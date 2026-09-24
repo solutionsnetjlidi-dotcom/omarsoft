@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base ────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-white text-gray-900 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  /* Arabic direction */
+  [dir="rtl"] body,
+  [dir="rtl"] * {
+    font-family: 'Noto Kufi Arabic', 'Noto Sans Arabic', sans-serif;
+  }
+  [dir="ltr"] body,
+  [dir="ltr"] * {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* ─── Utilities ───────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  /* Ocean gradient */
+  .gradient-ocean {
+    background: linear-gradient(135deg, #0d0d2b 0%, #0077b6 50%, #00b4d8 100%);
+  }
+  .gradient-text {
+    background: linear-gradient(90deg, #00b4d8, #48cae4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* ─── Print Styles ────────────────────────────────────────── */
+@media print {
+  /* Hide everything except the document */
+  body > * {
+    display: none !important;
+  }
+  .print-document-wrapper {
+    display: block !important;
+  }
+  #print-root {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background: white;
+  }
+  /* A4 page settings */
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  /* Prevent page breaks inside important elements */
+  .avoid-break {
+    page-break-inside: avoid;
+  }
+}
