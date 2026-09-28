@@ -1,3 +1,8 @@
+/**
+ * ServicesAndTraining.jsx — v2
+ * Écoute l'événement 'omarServiceTab' émis par OrbitSystem
+ * pour changer d'onglet automatiquement lors d'un clic sur l'orbit.
+ */
 import { useEffect, useState } from 'react'
 import {
   Wrench, Monitor, Wifi, BookOpen, Camera, TrendingUp,
@@ -6,12 +11,10 @@ import {
 import { supabase } from '../lib/supabaseClient'
 import { useLang } from '../context/LanguageContext'
 import { formatPrice } from '../utils/currencyFormatter'
-import { openWhatsApp, buildAnydeskMessage, buildServiceMessage, config } from '../utils/config'
+import { openWhatsApp, buildAnydeskMessage, buildServiceMessage } from '../utils/config'
 
-// Map icon name string → Lucide component
-const ICON_MAP = {
-  Wrench, Monitor, Wifi, BookOpen, Camera, TrendingUp,
-}
+const ICON_MAP = { Wrench, Monitor, Wifi, BookOpen, Camera, TrendingUp }
+
 function DynamicIcon({ name, size = 24, className = '' }) {
   const Icon = ICON_MAP[name] || Wrench
   return <Icon size={size} className={className} />
@@ -19,13 +22,13 @@ function DynamicIcon({ name, size = 24, className = '' }) {
 
 const TABS = ['service', 'training', 'media']
 
-// ── AnyDesk quick form ──────────────────────────────────────
+/* ── AnyDesk Form ──────────────────────────────────── */
 function AnyDeskSection({ t }) {
-  const [form, setForm]   = useState({ name: '', phone: '', anydeskId: '', description: '' })
-  const [saving, setSaving] = useState(false)
-  const [sent, setSent]   = useState(false)
+  const [form, setForm]   = useState({ name:'', phone:'', anydeskId:'', description:'' })
+  const [saving,setSaving] = useState(false)
+  const [sent,  setSent]   = useState(false)
 
-  function set(field, value) { setForm((f) => ({ ...f, [field]: value })) }
+  function set(f, v) { setForm((p) => ({ ...p, [f]: v })) }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -39,8 +42,7 @@ function AnyDeskSection({ t }) {
         anydesk_id:   form.anydeskId,
         message:      form.description,
       })
-    } catch (_) { /* fire and forget */ }
-    // Open WhatsApp regardless
+    } catch (_) {}
     openWhatsApp(buildAnydeskMessage(form))
     setSent(true)
     setSaving(false)
@@ -67,38 +69,20 @@ function AnyDeskSection({ t }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input
-              required
-              value={form.name}
-              onChange={(e) => set('name', e.target.value)}
+            <input required value={form.name} onChange={(e) => set('name', e.target.value)}
               placeholder={`${t('anydesk.namePlaceholder')} *`}
-              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean focus:ring-1 focus:ring-ocean"
-            />
-            <input
-              value={form.phone}
-              onChange={(e) => set('phone', e.target.value)}
+              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean" />
+            <input value={form.phone} onChange={(e) => set('phone', e.target.value)}
               placeholder={t('anydesk.phonePlaceholder')}
-              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean focus:ring-1 focus:ring-ocean"
-            />
-            <input
-              required
-              value={form.anydeskId}
-              onChange={(e) => set('anydeskId', e.target.value)}
+              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean" />
+            <input required value={form.anydeskId} onChange={(e) => set('anydeskId', e.target.value)}
               placeholder={`${t('anydesk.placeholder')} *`}
-              className="sm:col-span-2 w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean focus:ring-1 focus:ring-ocean font-mono"
-            />
-            <textarea
-              rows={3}
-              value={form.description}
-              onChange={(e) => set('description', e.target.value)}
+              className="sm:col-span-2 w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean font-mono" />
+            <textarea rows={3} value={form.description} onChange={(e) => set('description', e.target.value)}
               placeholder={t('anydesk.descPlaceholder')}
-              className="sm:col-span-2 w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean focus:ring-1 focus:ring-ocean resize-none"
-            />
-            <button
-              type="submit"
-              disabled={saving}
-              className="sm:col-span-2 flex items-center justify-center gap-2 bg-amber-brand hover:bg-amber-dark text-midnight font-bold py-3.5 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+              className="sm:col-span-2 w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean resize-none" />
+            <button type="submit" disabled={saving}
+              className="sm:col-span-2 flex items-center justify-center gap-2 bg-amber-brand hover:bg-amber-dark text-midnight font-bold py-3.5 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-60">
               <Send size={17} />
               {saving ? t('common.loading') : t('anydesk.submit')}
             </button>
@@ -110,33 +94,24 @@ function AnyDeskSection({ t }) {
   )
 }
 
-// ── Single service card ─────────────────────────────────────
+/* ── Service Card ──────────────────────────────────── */
 function ServiceCard({ service, lang, t, getName, getDesc }) {
-  const name  = getName(service)
-  const desc  = getDesc(service)
-  const price = formatPrice(service.price_tnd, lang)
+  const name     = getName(service)
+  const desc     = getDesc(service)
+  const price    = formatPrice(service.price_tnd, lang)
   const features = service[`features_${lang}`] || service.features_fr || []
-  const priceLabel = service.price_type === 'per_hour' ? t('services.perHour')
-    : service.price_type === 'fixed' ? '' : t('admin.services.priceType.custom') || ''
-
-  function handleRequest() {
-    openWhatsApp(buildServiceMessage({ serviceName: name }))
-  }
+  const priceLabel = service.price_type === 'per_hour' ? t('services.perHour') : ''
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 hover:border-ocean/30 hover:shadow-xl hover:shadow-ocean/5 transition-all duration-300 flex flex-col overflow-hidden group">
       <div className="p-6 flex-1">
-        {/* Icon */}
         <div className="w-12 h-12 rounded-2xl bg-ocean/10 group-hover:bg-ocean/20 flex items-center justify-center mb-4 transition-colors">
           <DynamicIcon name={service.icon_name} size={22} className="text-ocean" />
         </div>
-
         <h3 className="font-extrabold text-slate-900 text-lg mb-2 leading-snug group-hover:text-ocean transition-colors">
           {name}
         </h3>
         <p className="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">{desc}</p>
-
-        {/* Features list */}
         {features.length > 0 && (
           <ul className="space-y-1.5 mb-4">
             {features.slice(0, 4).map((feat, i) => (
@@ -148,8 +123,6 @@ function ServiceCard({ service, lang, t, getName, getDesc }) {
           </ul>
         )}
       </div>
-
-      {/* Footer */}
       <div className="px-6 pb-6 pt-3 border-t border-slate-100">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -159,43 +132,75 @@ function ServiceCard({ service, lang, t, getName, getDesc }) {
                 {priceLabel && <span className="text-slate-400 text-sm">{priceLabel}</span>}
               </div>
             ) : (
-              <span className="text-ocean font-semibold text-sm">
-                {t('admin.services.priceType.custom')}
-              </span>
+              <span className="text-ocean font-semibold text-sm">Sur devis</span>
             )}
           </div>
           {service.duration && (
             <div className="flex items-center gap-1 text-slate-400 text-xs">
-              <Clock size={12} />
-              {service.duration}
+              <Clock size={12} />{service.duration}
             </div>
           )}
         </div>
         <button
-          onClick={handleRequest}
-          className="w-full flex items-center justify-center gap-2 bg-midnight hover:bg-midnight-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md"
-        >
-          <MessageCircle size={15} />
-          {t('services.requestService')}
+          onClick={() => openWhatsApp(buildServiceMessage({ serviceName: name }))}
+          className="w-full flex items-center justify-center gap-2 bg-midnight hover:bg-midnight-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md">
+          <MessageCircle size={15} />{t('services.requestService')}
         </button>
       </div>
     </div>
   )
 }
 
-// ── Main component ──────────────────────────────────────────
+/* ── TAB LABEL with highlight animation ────────────── */
+function TabBtn({ tabKey, active, onClick, label, highlighted }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        px-5 py-2.5 text-sm font-semibold rounded-xl border transition-all relative overflow-hidden
+        ${active
+          ? 'bg-midnight text-white border-midnight shadow-lg shadow-midnight/20'
+          : 'bg-white text-slate-600 border-slate-200 hover:border-midnight/40 hover:text-midnight'}
+        ${highlighted ? 'ring-2 ring-ocean ring-offset-2' : ''}
+      `}
+    >
+      {label}
+      {/* Pulse ring when activated by orbit click */}
+      {highlighted && (
+        <span className="absolute inset-0 rounded-xl animate-ping bg-ocean/20 pointer-events-none" />
+      )}
+    </button>
+  )
+}
+
+/* ── Main Component ────────────────────────────────── */
 export default function ServicesAndTraining() {
   const { t, lang, getName, getDesc } = useLang()
-  const [services, setServices] = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [error,    setError]    = useState(null)
+  const [services,  setServices]  = useState([])
+  const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState(null)
   const [activeTab, setActiveTab] = useState('service')
+  const [highlighted, setHighlighted] = useState(null) // tab momentanément mis en évidence
 
+  /* ── Écoute les clics de l'orbit ──────────────── */
+  useEffect(() => {
+    function onOrbitClick(e) {
+      const { tab } = e.detail || {}
+      if (!tab) return
+      setActiveTab(tab)
+      // Pulse visuel sur le tab pendant 1.2s
+      setHighlighted(tab)
+      setTimeout(() => setHighlighted(null), 1200)
+    }
+    window.addEventListener('omarServiceTab', onOrbitClick)
+    return () => window.removeEventListener('omarServiceTab', onOrbitClick)
+  }, [])
+
+  /* ── Chargement Supabase ──────────────────────── */
   useEffect(() => {
     async function fetchServices() {
       const { data, error } = await supabase
-        .from('services')
-        .select('*')
+        .from('services').select('*')
         .eq('is_visible', true)
         .order('sort_order', { ascending: true })
       if (error) setError(error.message)
@@ -211,74 +216,59 @@ export default function ServicesAndTraining() {
     <section id="services" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Section header */}
+        {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 text-ocean font-semibold text-sm mb-3 uppercase tracking-wider">
-            <Wrench size={15} />
-            {t('services.title')}
+            <Wrench size={15} />{t('services.title')}
           </div>
           <h2 className="text-3xl lg:text-4xl font-extrabold text-midnight mb-4">
             {t('services.subtitle')}
           </h2>
         </div>
 
-        {/* Category tabs */}
+        {/* Tabs */}
         <div className="flex gap-2 justify-center mb-10 flex-wrap">
           {TABS.map((tab) => (
-            <button
+            <TabBtn
               key={tab}
+              tabKey={tab}
+              active={activeTab === tab}
+              highlighted={highlighted === tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2.5 text-sm font-semibold rounded-xl border transition-all ${
-                activeTab === tab
-                  ? 'bg-midnight text-white border-midnight shadow-lg shadow-midnight/20'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-midnight/40 hover:text-midnight'
-              }`}
-            >
-              {t(`services.categories.${tab}`)}
-            </button>
+              label={t(`services.categories.${tab}`)}
+            />
           ))}
         </div>
 
-        {/* Services grid */}
+        {/* Service grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-slate-100 p-6 animate-pulse space-y-4">
+            {[1,2,3].map((i) => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-100 p-6 animate-pulse space-y-4 h-52">
                 <div className="w-12 h-12 bg-slate-200 rounded-2xl" />
                 <div className="h-5 bg-slate-200 rounded w-2/3" />
                 <div className="h-3 bg-slate-200 rounded" />
-                <div className="h-3 bg-slate-200 rounded w-4/5" />
               </div>
             ))}
           </div>
         ) : error ? (
           <div className="flex items-center gap-3 bg-red-50 text-red-700 px-5 py-4 rounded-xl border border-red-200">
-            <AlertCircle size={18} />
-            <span className="text-sm">{error}</span>
+            <AlertCircle size={18} /><span className="text-sm">{error}</span>
           </div>
         ) : tabServices.length === 0 ? (
           <p className="text-center text-slate-400 py-12">{t('common.noData')}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {tabServices.map((s) => (
-              <ServiceCard
-                key={s.id}
-                service={s}
-                lang={lang}
-                t={t}
-                getName={getName}
-                getDesc={getDesc}
-              />
+              <ServiceCard key={s.id} service={s} lang={lang} t={t} getName={getName} getDesc={getDesc} />
             ))}
           </div>
         )}
 
-        {/* AnyDesk section — always shown below services */}
+        {/* AnyDesk section */}
         <div className="mt-16" id="assistance">
           <AnyDeskSection t={t} />
         </div>
-
-        {/* Training CTA separator */}
         <div id="training" className="mt-2" />
       </div>
     </section>
