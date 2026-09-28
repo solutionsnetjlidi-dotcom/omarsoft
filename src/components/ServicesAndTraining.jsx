@@ -1,275 +1,177 @@
-/**
- * ServicesAndTraining.jsx — v2
- * Écoute l'événement 'omarServiceTab' émis par OrbitSystem
- * pour changer d'onglet automatiquement lors d'un clic sur l'orbit.
- */
 import { useEffect, useState } from 'react'
-import {
-  Wrench, Monitor, Wifi, BookOpen, Camera, TrendingUp,
-  CheckCircle2, Clock, MessageCircle, AlertCircle, Send,
-} from 'lucide-react'
-import { supabase } from '../lib/supabaseClient'
+import { Wrench, Wifi, GraduationCap, Megaphone, ArrowRight, Check } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
-import { formatPrice } from '../utils/currencyFormatter'
-import { openWhatsApp, buildAnydeskMessage, buildServiceMessage } from '../utils/config'
+import { openWhatsApp } from '../utils/config'
 
-const ICON_MAP = { Wrench, Monitor, Wifi, BookOpen, Camera, TrendingUp }
+const TABS = [
+  { id: 'repair', labelKey: 'services.tabs.repair', icon: Wrench, color: 'text-ocean' },
+  { id: 'network', labelKey: 'services.tabs.network', icon: Wifi, color: 'text-emerald-500' },
+  { id: 'training', labelKey: 'services.tabs.training', icon: GraduationCap, color: 'text-amber-500' },
+  { id: 'media', labelKey: 'services.tabs.media', icon: Megaphone, color: 'text-purple-500' },
+]
 
-function DynamicIcon({ name, size = 24, className = '' }) {
-  const Icon = ICON_MAP[name] || Wrench
-  return <Icon size={size} className={className} />
-}
+export default function ServicesAndTraining() {
+  const { t } = useLang()
+  // Par défaut, on affiche le premier onglet (repair) ou celui passé dans l'URL
+  const [activeTab, setActiveTab] = useState('repair')
 
-const TABS = ['service', 'training', 'media']
+  useEffect(() => {
+    // Écouteur d'événement venant de OrbitSystem.jsx
+    const handleTabActivation = (event) => {
+      setActiveTab(event.detail)
+    }
+    
+    window.addEventListener('activateServiceTab', handleTabActivation)
+    
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => {
+      window.removeEventListener('activateServiceTab', handleTabActivation)
+    }
+  }, [])
 
-/* ── AnyDesk Form ──────────────────────────────────── */
-function AnyDeskSection({ t }) {
-  const [form, setForm]   = useState({ name:'', phone:'', anydeskId:'', description:'' })
-  const [saving,setSaving] = useState(false)
-  const [sent,  setSent]   = useState(false)
-
-  function set(f, v) { setForm((p) => ({ ...p, [f]: v })) }
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-    if (!form.name || !form.anydeskId) return
-    setSaving(true)
-    try {
-      await supabase.from('service_requests').insert({
-        request_type: 'anydesk',
-        client_name:  form.name,
-        client_phone: form.phone,
-        anydesk_id:   form.anydeskId,
-        message:      form.description,
-      })
-    } catch (_) {}
-    openWhatsApp(buildAnydeskMessage(form))
-    setSent(true)
-    setSaving(false)
+  // Données des services (adaptez les clés de traduction selon votre fichier de langue)
+  const servicesData = {
+    repair: {
+      title: t('services.repair.title', 'Diagnostic & Réparation PC'),
+      desc: t('services.repair.desc', 'Diagnostic complet et réparation matérielle/logicielle pour PC fixes et portables.'),
+      features: [
+        t('services.repair.f1', 'Diagnostic matériel complet'),
+        t('services.repair.f2', 'Réparation pannes matérielles'),
+        t('services.repair.f3', 'Réinstallation Windows / OS'),
+        t('services.repair.f4', 'Nettoyage et optimisation'),
+      ],
+      price: '80 TND',
+      duration: '1–4 heures',
+    },
+    network: {
+      title: t('services.network.title', 'Installation Réseau Wi-Fi & Fibre'),
+      desc: t('services.network.desc', 'Installation, câblage et configuration de réseaux Wi-Fi, LAN et vidéosurveillance IP.'),
+      features: [
+        t('services.network.f1', 'Audit réseau & recommandations'),
+        t('services.network.f2', 'Câblage RJ45 / fibre optique'),
+        t('services.network.f3', 'Configuration routeurs & switches'),
+        t('services.network.f4', 'Installation caméras IP PoE'),
+      ],
+      price: '150 TND',
+      duration: 'Demi-journée',
+    },
+    training: {
+      title: t('services.training.title', 'Formations Bureautiques'),
+      desc: t('services.training.desc', 'Sessions de formation personnalisées pour maîtriser les outils numériques essentiels.'),
+      features: [
+        t('services.training.f1', 'Pack Office (Word, Excel, PowerPoint)'),
+        t('services.training.f2', 'Initiation à la maintenance PC'),
+        t('services.training.f3', 'Sécurité informatique de base'),
+        t('services.training.f4', 'Support pédagogique inclus'),
+      ],
+      price: 'Sur devis',
+      duration: 'Selon programme',
+    },
+    media: {
+      title: t('services.media.title', 'Agence Média & Meta Ads'),
+      desc: t('services.media.desc', 'Création de contenu numérique, gestion de réseaux sociaux et campagnes publicitaires ciblées.'),
+      features: [
+        t('services.media.f1', 'Shooting photo & vidéo professionnel'),
+        t('services.media.f2', 'Gestion de pages Facebook/Instagram'),
+        t('services.media.f3', 'Campagnes Meta Ads optimisées'),
+        t('services.media.f4', 'Reporting et analyse de performance'),
+      ],
+      price: 'Sur devis',
+      duration: 'Mensuel',
+    }
   }
 
-  return (
-    <div id="anydesk" className="bg-midnight rounded-3xl p-8 lg:p-10">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-ocean/20 border border-ocean/30 flex items-center justify-center">
-            <Monitor size={20} className="text-ocean" />
-          </div>
-          <h3 className="text-2xl font-extrabold text-white">{t('anydesk.title')}</h3>
-        </div>
-        <p className="text-white/60 mb-8 leading-relaxed">{t('anydesk.subtitle')}</p>
-
-        {sent ? (
-          <div className="flex items-center gap-3 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl px-6 py-4">
-            <CheckCircle2 size={22} className="text-emerald-400 flex-shrink-0" />
-            <div>
-              <p className="text-emerald-300 font-semibold">{t('contact.sent')}</p>
-              <p className="text-white/50 text-sm mt-0.5">{t('anydesk.tools')}</p>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input required value={form.name} onChange={(e) => set('name', e.target.value)}
-              placeholder={`${t('anydesk.namePlaceholder')} *`}
-              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean" />
-            <input value={form.phone} onChange={(e) => set('phone', e.target.value)}
-              placeholder={t('anydesk.phonePlaceholder')}
-              className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean" />
-            <input required value={form.anydeskId} onChange={(e) => set('anydeskId', e.target.value)}
-              placeholder={`${t('anydesk.placeholder')} *`}
-              className="sm:col-span-2 w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean font-mono" />
-            <textarea rows={3} value={form.description} onChange={(e) => set('description', e.target.value)}
-              placeholder={t('anydesk.descPlaceholder')}
-              className="sm:col-span-2 w-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-ocean resize-none" />
-            <button type="submit" disabled={saving}
-              className="sm:col-span-2 flex items-center justify-center gap-2 bg-amber-brand hover:bg-amber-dark text-midnight font-bold py-3.5 rounded-xl transition-all hover:-translate-y-0.5 disabled:opacity-60">
-              <Send size={17} />
-              {saving ? t('common.loading') : t('anydesk.submit')}
-            </button>
-            <p className="sm:col-span-2 text-white/40 text-xs text-center">{t('anydesk.tools')}</p>
-          </form>
-        )}
-      </div>
-    </div>
-  )
-}
-
-/* ── Service Card ──────────────────────────────────── */
-function ServiceCard({ service, lang, t, getName, getDesc }) {
-  const name     = getName(service)
-  const desc     = getDesc(service)
-  const price    = formatPrice(service.price_tnd, lang)
-  const features = service[`features_${lang}`] || service.features_fr || []
-  const priceLabel = service.price_type === 'per_hour' ? t('services.perHour') : ''
+  const currentService = servicesData[activeTab]
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 hover:border-ocean/30 hover:shadow-xl hover:shadow-ocean/5 transition-all duration-300 flex flex-col overflow-hidden group">
-      <div className="p-6 flex-1">
-        <div className="w-12 h-12 rounded-2xl bg-ocean/10 group-hover:bg-ocean/20 flex items-center justify-center mb-4 transition-colors">
-          <DynamicIcon name={service.icon_name} size={22} className="text-ocean" />
-        </div>
-        <h3 className="font-extrabold text-slate-900 text-lg mb-2 leading-snug group-hover:text-ocean transition-colors">
-          {name}
-        </h3>
-        <p className="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-3">{desc}</p>
-        {features.length > 0 && (
-          <ul className="space-y-1.5 mb-4">
-            {features.slice(0, 4).map((feat, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                <CheckCircle2 size={14} className="text-ocean flex-shrink-0 mt-0.5" />
-                {feat}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="px-6 pb-6 pt-3 border-t border-slate-100">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            {service.price_tnd ? (
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-extrabold text-midnight">{price}</span>
-                {priceLabel && <span className="text-slate-400 text-sm">{priceLabel}</span>}
-              </div>
-            ) : (
-              <span className="text-ocean font-semibold text-sm">Sur devis</span>
-            )}
-          </div>
-          {service.duration && (
-            <div className="flex items-center gap-1 text-slate-400 text-xs">
-              <Clock size={12} />{service.duration}
-            </div>
-          )}
-        </div>
-        <button
-          onClick={() => openWhatsApp(buildServiceMessage({ serviceName: name }))}
-          className="w-full flex items-center justify-center gap-2 bg-midnight hover:bg-midnight-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md">
-          <MessageCircle size={15} />{t('services.requestService')}
-        </button>
-      </div>
-    </div>
-  )
-}
-
-/* ── TAB LABEL with highlight animation ────────────── */
-function TabBtn({ tabKey, active, onClick, label, highlighted }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        px-5 py-2.5 text-sm font-semibold rounded-xl border transition-all relative overflow-hidden
-        ${active
-          ? 'bg-midnight text-white border-midnight shadow-lg shadow-midnight/20'
-          : 'bg-white text-slate-600 border-slate-200 hover:border-midnight/40 hover:text-midnight'}
-        ${highlighted ? 'ring-2 ring-ocean ring-offset-2' : ''}
-      `}
-    >
-      {label}
-      {/* Pulse ring when activated by orbit click */}
-      {highlighted && (
-        <span className="absolute inset-0 rounded-xl animate-ping bg-ocean/20 pointer-events-none" />
-      )}
-    </button>
-  )
-}
-
-/* ── Main Component ────────────────────────────────── */
-export default function ServicesAndTraining() {
-  const { t, lang, getName, getDesc } = useLang()
-  const [services,  setServices]  = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
-  const [activeTab, setActiveTab] = useState('service')
-  const [highlighted, setHighlighted] = useState(null) // tab momentanément mis en évidence
-
-  /* ── Écoute les clics de l'orbit ──────────────── */
-  useEffect(() => {
-    function onOrbitClick(e) {
-      const { tab } = e.detail || {}
-      if (!tab) return
-      setActiveTab(tab)
-      // Pulse visuel sur le tab pendant 1.2s
-      setHighlighted(tab)
-      setTimeout(() => setHighlighted(null), 1200)
-    }
-    window.addEventListener('omarServiceTab', onOrbitClick)
-    return () => window.removeEventListener('omarServiceTab', onOrbitClick)
-  }, [])
-
-  /* ── Chargement Supabase ──────────────────────── */
-  useEffect(() => {
-    async function fetchServices() {
-      const { data, error } = await supabase
-        .from('services').select('*')
-        .eq('is_visible', true)
-        .order('sort_order', { ascending: true })
-      if (error) setError(error.message)
-      else setServices(data || [])
-      setLoading(false)
-    }
-    fetchServices()
-  }, [])
-
-  const tabServices = services.filter((s) => s.category === activeTab)
-
-  return (
-    <section id="services" className="py-20 bg-white">
+    <section id="services" className="py-20 bg-white relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 text-ocean font-semibold text-sm mb-3 uppercase tracking-wider">
-            <Wrench size={15} />{t('services.title')}
+            <Wrench size={15} />
+            {t('services.subtitle', 'Nos Prestations')}
           </div>
           <h2 className="text-3xl lg:text-4xl font-extrabold text-midnight mb-4">
-            {t('services.subtitle')}
+            {t('services.title', 'Des services informatiques professionnels, réactifs et abordables')}
           </h2>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 justify-center mb-10 flex-wrap">
-          {TABS.map((tab) => (
-            <TabBtn
-              key={tab}
-              tabKey={tab}
-              active={activeTab === tab}
-              highlighted={highlighted === tab}
-              onClick={() => setActiveTab(tab)}
-              label={t(`services.categories.${tab}`)}
-            />
-          ))}
+        {/* Tabs Navigation */}
+        <div className="flex flex-wrap justify-center gap-2 mb-10">
+          {TABS.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold rounded-xl border transition-all duration-300 ${
+                  isActive
+                    ? 'bg-midnight text-white border-midnight shadow-lg shadow-midnight/20'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-ocean/40 hover:text-ocean'
+                }`}
+              >
+                <Icon size={16} className={isActive ? 'text-ocean' : tab.color} />
+                {t(tab.labelKey)}
+              </button>
+            )
+          })}
         </div>
 
-        {/* Service grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1,2,3].map((i) => (
-              <div key={i} className="bg-white rounded-2xl border border-slate-100 p-6 animate-pulse space-y-4 h-52">
-                <div className="w-12 h-12 bg-slate-200 rounded-2xl" />
-                <div className="h-5 bg-slate-200 rounded w-2/3" />
-                <div className="h-3 bg-slate-200 rounded" />
+        {/* Active Tab Content */}
+        <div className="max-w-4xl mx-auto bg-slate-50 rounded-3xl border border-slate-100 p-6 sm:p-10 shadow-sm transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Left: Info */}
+            <div className="flex-1">
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white border border-slate-200 mb-4`}>
+                {(() => {
+                  const Icon = TABS.find(t => t.id === activeTab)?.icon
+                  return <Icon size={24} className={TABS.find(t => t.id === activeTab)?.color} />
+                })()}
               </div>
-            ))}
-          </div>
-        ) : error ? (
-          <div className="flex items-center gap-3 bg-red-50 text-red-700 px-5 py-4 rounded-xl border border-red-200">
-            <AlertCircle size={18} /><span className="text-sm">{error}</span>
-          </div>
-        ) : tabServices.length === 0 ? (
-          <p className="text-center text-slate-400 py-12">{t('common.noData')}</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tabServices.map((s) => (
-              <ServiceCard key={s.id} service={s} lang={lang} t={t} getName={getName} getDesc={getDesc} />
-            ))}
-          </div>
-        )}
+              <h3 className="text-2xl font-bold text-midnight mb-3">{currentService.title}</h3>
+              <p className="text-slate-600 leading-relaxed mb-6">{currentService.desc}</p>
+              
+              <ul className="space-y-3 mb-8">
+                {currentService.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-sm text-slate-700">
+                    <Check size={16} className="text-ocean mt-0.5 flex-shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
 
-        {/* AnyDesk section */}
-        <div className="mt-16" id="assistance">
-          <AnyDeskSection t={t} />
+              <button
+                onClick={() => openWhatsApp(`Bonjour, je suis intéressé par le service : ${currentService.title}`)}
+                className="flex items-center gap-2 bg-ocean hover:bg-ocean-dark text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-ocean/20 hover:shadow-ocean/40 hover:-translate-y-0.5"
+              >
+                {t('common.requestService', 'Demander ce service')}
+                <ArrowRight size={18} />
+              </button>
+            </div>
+
+            {/* Right: Pricing Card */}
+            <div className="md:w-72 flex-shrink-0">
+              <div className="bg-midnight text-white rounded-2xl p-6 text-center shadow-xl">
+                <p className="text-white/60 text-sm font-medium mb-2">{t('common.startingAt', 'À partir de')}</p>
+                <div className="text-3xl font-extrabold text-ocean mb-1">{currentService.price}</div>
+                <div className="text-white/40 text-xs mb-6">{currentService.duration}</div>
+                
+                <div className="border-t border-white/10 pt-4 space-y-3 text-left">
+                  <div className="flex items-center gap-2 text-sm text-white/70">
+                    <Check size={14} className="text-emerald-400" />
+                    {t('common.support', 'Support réactif')}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-white/70">
+                    <Check size={14} className="text-emerald-400" />
+                    {t('common.guarantee', 'Garantie intervention')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div id="training" className="mt-2" />
       </div>
     </section>
   )
