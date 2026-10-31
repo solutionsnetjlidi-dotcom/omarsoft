@@ -1,0 +1,13 @@
+# OmarSoft – Jlidi Network Solutions
+# https://www.omarsoft.tn
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.omarsoft.tn/sitemap.xml
+Sitemap: https://www.omarsoft.tn/sitemap-images.xml
+
+# Éviter les pages admin
+Disallow: /admin
+Disallow: /admin/
