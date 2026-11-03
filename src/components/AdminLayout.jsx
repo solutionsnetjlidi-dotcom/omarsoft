@@ -72,7 +72,7 @@ export default function AdminLayout({ children }) {
           <NavLink key={to} to={to} end={end} onClick={()=>setOpen(false)}
             className={({isActive})=>`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all relative ${isActive?'bg-ocean text-white':'text-white/55 hover:bg-white/10 hover:text-white'}`}>
             <Icon size={17}/>
-            {t(`admin.${label}`)}
+            {t(`admin.nav.${label}`)}
             {label==='requests' && pendingCount>0 && (
               <span className="ml-auto bg-amber-400 text-slate-900 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                 {pendingCount>99?'99+':pendingCount}
@@ -107,7 +107,7 @@ export default function AdminLayout({ children }) {
   )
 
   return (
-    <div className="min-h-screen bg-slate-100 flex">
+    <div dir="ltr" className="min-h-screen bg-slate-100 flex">
       {/* Desktop sidebar */}
       <div className="hidden lg:flex flex-col w-64 flex-shrink-0 fixed inset-y-0 left-0 z-30"><SidebarInner/></div>
 

@@ -1,41 +1,35 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey  = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    '⚠️  Supabase: Variables VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY manquantes.\n' +
-    'Copiez .env.example → .env.local et remplissez vos clés Supabase.'
-  )
-}
+/* false si les variables d'environnement manquent : main.jsx affiche alors
+   un message d'aide au lieu d'une page blanche. */
+export const supabaseReady = Boolean(supabaseUrl && supabaseKey)
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-})
+export const supabase = createClient(
+  supabaseUrl || 'http://localhost:54321',
+  supabaseKey || 'cle-manquante',
+  { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+)
 
-// Helper : upload d'un fichier dans Supabase Storage
+/* Upload d'un fichier dans Supabase Storage → renvoie l'URL publique.
+   Nécessite les règles d'accès Storage de supabase/schema.sql (section 6). */
 export async function uploadFile(bucket, path, file) {
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(path, file, { upsert: true })
+  const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
   if (error) throw error
   const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path)
   return urlData.publicUrl
 }
 
-// Helper : supprimer un fichier de Storage
 export async function deleteFile(bucket, path) {
   const { error } = await supabase.storage.from(bucket).remove([path])
   if (error) throw error
 }
 
-// Helper : extraire le path depuis une URL publique
+/* Extrait le chemin du fichier depuis son URL publique (pour le supprimer) */
 export function extractStoragePath(publicUrl, bucket) {
+  if (!publicUrl) return null
   const marker = `/storage/v1/object/public/${bucket}/`
   const idx = publicUrl.indexOf(marker)
   return idx !== -1 ? publicUrl.substring(idx + marker.length) : null

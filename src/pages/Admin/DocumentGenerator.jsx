@@ -274,11 +274,10 @@ export default function DocumentGenerator() {
 
       const existing = await supabase.from('invoices_and_quotes').select('id').eq('document_number', doc.document_number).maybeSingle()
 
-      if (existing.data?.id) {
-        await supabase.from('invoices_and_quotes').update(payload).eq('id', existing.data.id)
-      } else {
-        await supabase.from('invoices_and_quotes').insert(payload)
-      }
+      const { error: saveError } = existing.data?.id
+        ? await supabase.from('invoices_and_quotes').update(payload).eq('id', existing.data.id)
+        : await supabase.from('invoices_and_quotes').insert(payload)
+      if (saveError) throw saveError
 
       setSaved(true)
       setTimeout(() => setSaved(false), 3500)
@@ -311,7 +310,7 @@ export default function DocumentGenerator() {
             </button>
             <button
               onClick={() => {
-                if (!doc.client_name) { setError("Renseignez d'abord le client."); return }
+                if (!doc.client_name) { setError('Renseignez d’abord le client.'); return }
                 setPreview(true)
               }}
               className="flex items-center gap-2 border border-ocean text-ocean font-semibold px-4 py-2 rounded-xl hover:bg-ocean/5 text-sm transition-colors"
@@ -549,7 +548,7 @@ export default function DocumentGenerator() {
               <div className="space-y-2">
                 <button
                   onClick={() => {
-                    if (!doc.client_name) { setError("Renseignez d'abord le client."); return }
+                    if (!doc.client_name) { setError('Renseignez d’abord le client.'); return }
                     setPreview(true)
                   }}
                   className="w-full flex items-center justify-center gap-2 bg-ocean hover:bg-ocean-dark text-white font-bold py-3 rounded-xl transition-colors text-sm"

@@ -1,30 +1,34 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
 import { useLang } from '../context/LanguageContext'
 import { openWhatsApp } from '../utils/config'
-import OrbitSystem from './OrbitSystem'
+import SolarSystem from './SolarSystem'
 
-const STATS = [
-  { key: 'experience',  value: 4 },
-  { key: 'clients',     value: 200, plus: true },
-  { key: 'repairs',     value: 500, plus: true },
-  { key: 'deployments', value: 80,  plus: true },
-]
+/* Les chiffres sont saisis dans Admin > Paramètres (stats_experience, stats_clients…).
+   Un chiffre vide n'est pas affiché : aucune statistique inventée. */
+const STAT_KEYS = ['experience', 'clients', 'repairs', 'deployments']
 
-function useCounter(target, duration = 1600, start = false) {
+function parseStat(raw) {
+  const n = parseInt(String(raw ?? '').replace(/[^\d]/g, ''), 10)
+  if (!Number.isFinite(n) || n <= 0) return null
+  return { value: n, plus: String(raw).includes('+') }
+}
+
+function useCounter(target, start) {
   const [val, setVal] = useState(0)
   useEffect(() => {
     if (!start) return
     const t0 = performance.now()
     let raf
     const step = (now) => {
-      const p = Math.min((now - t0) / duration, 1)
+      const p = Math.min((now - t0) / 1600, 1)
       setVal(Math.floor((1 - Math.pow(1 - p, 3)) * target))
       if (p < 1) raf = requestAnimationFrame(step)
     }
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
-  }, [target, duration, start])
+  }, [target, start])
   return val
 }
 
@@ -32,7 +36,7 @@ function StatCard({ statKey, target, plus }) {
   const { t } = useLang()
   const [go, setGo] = useState(false)
   const ref = useRef(null)
-  const val = useCounter(target, 1600, go)
+  const val = useCounter(target, go)
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setGo(true) }, { threshold: 0.4 })
     if (ref.current) obs.observe(ref.current)
@@ -48,6 +52,19 @@ function StatCard({ statKey, target, plus }) {
 
 export default function HeroSection() {
   const { t } = useLang()
+  const [stats, setStats] = useState([])
+
+  useEffect(() => {
+    let alive = true
+    supabase.from('company_settings').select('key,value').in('key', STAT_KEYS.map((k) => `stats_${k}`))
+      .then(({ data }) => {
+        if (!alive || !data) return
+        const map = Object.fromEntries(data.map((r) => [r.key, r.value]))
+        setStats(STAT_KEYS.map((k) => ({ key: k, ...parseStat(map[`stats_${k}`]) })).filter((s) => s.value))
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
 
   return (
     <section id="home" className="relative overflow-hidden bg-midnight dark:bg-slate-950 min-h-[92vh] flex items-center">
@@ -62,45 +79,45 @@ export default function HeroSection() {
       <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-gold/10 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 lg:py-0">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
 
-          {/* Texte */}
           <div>
             <div className="inline-flex items-center gap-2 bg-ocean/15 border border-ocean/30 rounded-full px-4 py-1.5 mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-ocean animate-pulse" />
               <span className="text-ocean text-sm font-semibold">{t('hero.eyebrow')}</span>
             </div>
 
-            {/* Titre seul : la ligne « au cœur de Djerba » est supprimée */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-[1.08] tracking-tight mb-6">
               {t('hero.title')}
             </h1>
 
             <p className="text-white/60 text-lg leading-relaxed max-w-xl mb-10">{t('hero.subtitle')}</p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-12">
+            <div className="flex flex-wrap gap-3 mb-12">
               <button
                 onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
-                className="flex items-center justify-center gap-2 bg-ocean hover:bg-ocean-dark text-white font-bold px-7 py-3.5 rounded-xl transition-all shadow-lg shadow-ocean/30 hover:-translate-y-0.5"
+                className="flex items-center justify-center gap-2 whitespace-nowrap bg-ocean hover:bg-ocean-dark text-white font-bold px-5 sm:px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-ocean/30 hover:-translate-y-0.5"
               >
                 {t('hero.ctaPrimary')}<ArrowRight size={18} className="rtl:rotate-180" />
               </button>
               <button
                 onClick={() => openWhatsApp()}
-                className="flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-midnight font-bold px-7 py-3.5 rounded-xl transition-all hover:-translate-y-0.5"
+                className="flex items-center justify-center gap-2 whitespace-nowrap bg-gold hover:bg-gold-dark text-midnight font-bold px-5 sm:px-6 py-3.5 rounded-xl transition-all hover:-translate-y-0.5"
               >
                 {t('hero.ctaSecondary')}
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-white/10">
-              {STATS.map((s) => <StatCard key={s.key} statKey={s.key} target={s.value} plus={s.plus} />)}
-            </div>
+            {stats.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-white/10">
+                {stats.map((s) => <StatCard key={s.key} statKey={s.key} target={s.value} plus={s.plus} />)}
+              </div>
+            )}
           </div>
 
-          {/* Orbite : visible et identique sur tous les appareils */}
+          {/* Système solaire : OmarSoft au centre, visible sur tous les appareils */}
           <div className="flex items-center justify-center">
-            <OrbitSystem />
+            <SolarSystem />
           </div>
 
         </div>

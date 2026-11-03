@@ -1,10 +1,15 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 const CartContext = createContext(null)
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState([])
+  const [items, setItems] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('omarsoft_cart') || '[]') } catch { return [] }
+  })
   const [open,  setOpen]  = useState(false)
+
+  // Le panier survit à un rechargement de la page
+  useEffect(() => { try { localStorage.setItem('omarsoft_cart', JSON.stringify(items)) } catch { /* stockage indisponible */ } }, [items])
 
   const addItem = useCallback((product) => {
     setItems(prev => {
@@ -30,21 +35,21 @@ export function CartProvider({ children }) {
   const count       = items.reduce((s, i) => s + i.qty, 0)
   const total       = items.reduce((s, i) => s + i.price_tnd * i.qty, 0)
 
-  function buildWhatsAppMessage() {
-    const lines = items.map(i => `• ${i.name} × ${i.qty} = ${(i.price_tnd * i.qty).toFixed(3)} TND`)
-    return `🛒 *Demande de devis — OmarSoft*\n\n${lines.join('\n')}\n\n💰 *Total estimé : ${total.toFixed(3)} TND*\n\nMerci de confirmer disponibilité et prix définitifs.`
+  const lineOf = (i) => `• ${i.name} × ${i.qty} = ${(i.price_tnd * i.qty).toFixed(3)} TND`
+
+  /* Texte brut enregistré dans « Admin > Demandes » */
+  function buildRequestText() {
+    return `${items.map(lineOf).join('\n')}\nTotal estimé : ${total.toFixed(3)} TND`
   }
 
-  function saveForAdmin() {
-    const docItems = items.map(i => ({
-      description: i.name, quantity: i.qty,
-      unit_price_tnd: i.price_tnd, total_tnd: i.price_tnd * i.qty,
-    }))
-    localStorage.setItem('omarsoft_cart_doc', JSON.stringify({ items: docItems, subtotal: total, timestamp: Date.now() }))
+  /* Message WhatsApp (mise en forme WhatsApp : *gras*) */
+  function buildWhatsAppMessage(name = '', phone = '') {
+    const who = name ? `Nom : ${name}${phone ? `\nTéléphone : ${phone}` : ''}\n\n` : ''
+    return `*Demande de devis — OmarSoft*\n\n${who}${items.map(lineOf).join('\n')}\n\n*Total estimé : ${total.toFixed(3)} TND*\n\nMerci de confirmer la disponibilité et les prix définitifs.`
   }
 
   return (
-    <CartContext.Provider value={{ items, open, count, total, setOpen, addItem, setQty, removeItem, clearCart, isInCart, buildWhatsAppMessage, saveForAdmin }}>
+    <CartContext.Provider value={{ items, open, count, total, setOpen, addItem, setQty, removeItem, clearCart, isInCart, buildWhatsAppMessage, buildRequestText }}>
       {children}
     </CartContext.Provider>
   )

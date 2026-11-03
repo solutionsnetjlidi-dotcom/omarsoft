@@ -1,40 +1,25 @@
 # OmarSoft – Jlidi Network Solutions
-> Votre partenaire IT & Multimédia à Djerba, Tunisie depuis 2021
+> Informatique, réseaux et agence média à Djerba, Tunisie
 
 ## À propos
-OmarSoft (STE Jlidi Network Solutions) est une entreprise tunisienne d'informatique
-et de services numériques basée à Djerba Midoun, Médenine, Tunisie.
-Fondée par Omar Jlidi, professionnel en technologies de l'information.
+OmarSoft (STE Jlidi Network Solutions) est une entreprise de services informatiques
+et numériques basée à Djerba Midoun, Médenine, Tunisie. Fondateur : Omar Jlidi.
 
-## Services proposés
-- Réparation & Diagnostic PC (PC fixes et portables, hardware/software)
-- Assistance à distance via AnyDesk, RustDesk, TeamViewer
-- Installation réseaux Wi-Fi, LAN, fibre optique, câblage RJ45
-- Installation caméras IP & systèmes de vidéosurveillance
-- Formations bureautiques : Microsoft Word, Excel, Outlook
-- Vente matériel informatique : PC, accessoires, réseau, imprimantes
-- Création de contenu digital : vidéos, Reels Instagram, TikTok
-- Campagnes publicitaires Facebook & Instagram (Meta Ads)
-- Montage vidéo & Motion Design
-- Génération de devis, factures et documents commerciaux
+## Services
+- Vente de matériel informatique
+- Réparation et dépannage
+- Installation de réseaux
+- Assistance à distance (AnyDesk)
+- Formations bureautiques (Word, Excel, Outlook)
+- Agence média et publicité Meta Ads
 
-## Informations de contact
+## Contact
 - Téléphone / WhatsApp : +216 54 421 123
 - Email : solutionsnetjlidi@gmail.com
 - Adresse : 4116 Djerba Midoun, Médenine, Tunisie
-- Site web : https://www.omarsoft.tn
+- Site : https://www.omarsoft.tn
 - Registre du commerce : C20215152024
 - Matricule fiscal : 1877339 E/M
 
-## Langues
-Français · العربية (Arabe) · English
-
-## Zone de service
-Djerba · Médenine · Tunisie (déplacements possibles)
-
-## Horaires
-Lundi – Samedi : 08h00 – 20h00
-
-## Technologies maîtrisées
-Cisco · SD-WAN · Fibre optique · IP HD Surveillance · Firewall
-ServiceNow ITSM · React · Supabase · Microsoft 365 · Meta Business Suite
+## Langues du site
+Français, العربية, English

@@ -6,7 +6,7 @@ export const config = {
   whatsapp:  import.meta.env.VITE_COMPANY_WHATSAPP || '+21654421123',
   email:     import.meta.env.VITE_COMPANY_EMAIL    || 'solutionsnetjlidi@gmail.com',
   phone:     import.meta.env.VITE_COMPANY_PHONE    || '+216 54 421 123',
-  anydeskId: import.meta.env.VITE_ANYDESK_ID       || 'XXXXXXXXX',
+  anydeskId: import.meta.env.VITE_ANYDESK_ID       || '',
   company: {
     nameFr:  'STE Jlidi Network Solutions',
     nameAr:  'شركة جليدي للشبكات والحلول الرقمية',

@@ -1,5 +1,6 @@
-import { X, ShoppingCart, Plus, Minus, Trash2, Send, FileText, Check } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { X, ShoppingCart, Plus, Minus, Trash2, Send } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
 import { useCart }  from '../context/CartContext'
 import { useLang }  from '../context/LanguageContext'
 import { openWhatsApp } from '../utils/config'
@@ -7,9 +8,25 @@ import { openWhatsApp } from '../utils/config'
 const fmt = n => new Intl.NumberFormat('fr-TN',{minimumFractionDigits:3}).format(n) + ' TND'
 
 export default function QuoteCart() {
-  const { items, open, count, total, setOpen, setQty, removeItem, clearCart, buildWhatsAppMessage, saveForAdmin } = useCart()
+  const { items, open, count, total, setOpen, setQty, removeItem, clearCart, buildWhatsAppMessage, buildRequestText } = useCart()
   const { isRTL } = useLang()
-  const navigate = useNavigate()
+  const [name,  setName]  = useState('')
+  const [phone, setPhone] = useState('')
+  const [hint,  setHint]  = useState(false)
+  const [busy,  setBusy]  = useState(false)
+
+  /* Enregistre la demande (visible dans Admin > Demandes, avec alerte) puis ouvre WhatsApp */
+  async function send() {
+    if (!name.trim()) { setHint(true); return }
+    setBusy(true)
+    try {
+      await supabase.from('service_requests').insert({
+        request_type: 'quote', client_name: name.trim(), client_phone: phone.trim(), message: buildRequestText(),
+      })
+    } catch { /* l'envoi WhatsApp continue même si l'enregistrement échoue */ }
+    openWhatsApp(buildWhatsAppMessage(name.trim(), phone.trim()))
+    setBusy(false); setHint(false); clearCart(); setOpen(false)
+  }
   const side = isRTL ? {left:'20px',right:'auto'} : {right:'20px',left:'auto'}
 
   return (
@@ -103,13 +120,14 @@ export default function QuoteCart() {
               <span style={{fontWeight:900,fontSize:'20px',color:'#0a1628'}}>{fmt(total)}</span>
             </div>
             <p style={{fontSize:'11px',color:'#94a3b8',textAlign:'center',margin:0}}>* Prix indicatifs, sous réserve de disponibilité</p>
-            <button onClick={()=>{openWhatsApp(buildWhatsAppMessage());setOpen(false)}}
-              style={{background:'#25D366',color:'#fff',border:'none',borderRadius:'14px',padding:'13px',fontWeight:700,fontSize:'14px',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-              <Send size={16}/>Envoyer via WhatsApp
-            </button>
-            <button onClick={()=>{saveForAdmin();navigate('/admin/documents');setOpen(false)}}
-              style={{background:'#fff',color:'#0a1628',border:'2px solid #0a1628',borderRadius:'14px',padding:'12px',fontWeight:700,fontSize:'14px',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-              <FileText size={16}/>Créer un devis officiel
+            <input value={name} onChange={e=>{setName(e.target.value);setHint(false)}} placeholder="Votre nom *" autoComplete="name"
+              style={{width:'100%',padding:'11px 12px',borderRadius:'12px',fontSize:'14px',fontFamily:'inherit',outline:'none',color:'#0f172a',background:'#fff',border:hint?'1px solid #ef4444':'1px solid #e2e8f0'}} />
+            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Votre téléphone" type="tel" autoComplete="tel"
+              style={{width:'100%',padding:'11px 12px',borderRadius:'12px',fontSize:'14px',fontFamily:'inherit',outline:'none',color:'#0f172a',background:'#fff',border:'1px solid #e2e8f0'}} />
+            {hint && <p style={{fontSize:'12px',color:'#ef4444',margin:0}}>Indiquez votre nom pour envoyer la demande.</p>}
+            <button onClick={send} disabled={busy}
+              style={{background:'#25D366',color:'#fff',border:'none',borderRadius:'14px',padding:'13px',fontWeight:700,fontSize:'14px',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',opacity:busy?.7:1}}>
+              <Send size={16}/>Envoyer la demande (WhatsApp)
             </button>
             <button onClick={clearCart} style={{background:'none',border:'none',color:'#94a3b8',fontSize:'12px',fontWeight:600,cursor:'pointer',padding:'4px'}}
               onMouseEnter={e=>e.currentTarget.style.color='#ef4444'} onMouseLeave={e=>e.currentTarget.style.color='#94a3b8'}>

@@ -35,7 +35,7 @@ function UploadModal({ onSave, onClose, t }) {
       const bucket  = 'media-gallery'
       const url     = await uploadFile(bucket, path, file)
 
-      await supabase.from('media_content').insert({
+      const { error: insertError } = await supabase.from('media_content').insert({
         title_fr:  form.title_fr,
         file_url:  url,
         file_type: isVideo ? 'video' : 'image',
@@ -43,6 +43,7 @@ function UploadModal({ onSave, onClose, t }) {
         sort_order: parseInt(form.sort_order) || 0,
         is_visible: true,
       })
+      if (insertError) throw insertError
       setProgress(null)
       onSave()
     } catch (err) {
@@ -157,7 +158,8 @@ export default function ManageMedia() {
   }
 
   async function toggleVisibility(item) {
-    await supabase.from('media_content').update({ is_visible: !item.is_visible }).eq('id', item.id)
+    const { error } = await supabase.from('media_content').update({ is_visible: !item.is_visible }).eq('id', item.id)
+    if (error) return showToast(error.message, false)
     setMedia((prev) => prev.map((m) => m.id === item.id ? { ...m, is_visible: !m.is_visible } : m))
     showToast(t('common.success'))
   }
@@ -167,7 +169,8 @@ export default function ManageMedia() {
     // Remove from storage
     const path = extractStoragePath(item.file_url, 'media-gallery')
     if (path) await deleteFile('media-gallery', path).catch(() => {})
-    await supabase.from('media_content').delete().eq('id', item.id)
+    const { error } = await supabase.from('media_content').delete().eq('id', item.id)
+    if (error) return showToast(error.message, false)
     setMedia((prev) => prev.filter((m) => m.id !== item.id))
     showToast(t('common.success'))
   }

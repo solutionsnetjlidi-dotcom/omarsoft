@@ -20,13 +20,14 @@ function ContactForm({ t }) {
     setSaving(true)
     setError(null)
     try {
-      await supabase.from('service_requests').insert({
+      const { error: dbError } = await supabase.from('service_requests').insert({
         request_type: 'contact',
         client_name:  form.name,
         client_email: form.email,
         client_phone: form.phone,
         message:      form.message,
       })
+      if (dbError) throw dbError   // supabase-js ne lève pas d'exception : on la déclenche ici
       setSent(true)
     } catch (err) {
       setError(t('contact.error'))

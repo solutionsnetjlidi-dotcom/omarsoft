@@ -30,7 +30,7 @@ export const translations = {
       ctaPrimary: 'Voir nos services',
       ctaSecondary: 'Assistance à distance',
       stats: {
-        experience: "Années d'expérience",
+        experience: "Années d’expérience",
         clients: 'Clients satisfaits',
         repairs: 'Réparations réalisées',
         deployments: 'Réseaux déployés',
@@ -108,11 +108,11 @@ export const translations = {
       send: 'Envoyer',
       sending: 'Envoi en cours...',
       sent: 'Message envoyé ! Nous vous répondons rapidement.',
-      error: "Erreur lors de l'envoi. Réessayer ou contactez-nous directement.",
+      error: "Erreur lors de l’envoi. Réessayez ou contactez-nous directement.",
     },
 
     footer: {
-      tagline: 'Votre partenaire IT & Multimédia à Djerba depuis 2021.',
+      tagline: 'Votre partenaire IT & Multimédia à Djerba.',
       services: 'Nos services',
       legal: 'Informations légales',
       rc: 'Registre du commerce',
@@ -135,7 +135,7 @@ export const translations = {
 
       login: {
         title: 'Connexion Admin',
-        subtitle: "Accès réservé à l'administrateur OMARSOFT",
+        subtitle: 'Accès réservé à l’administrateur OMARSOFT',
         email: 'Adresse e-mail',
         password: 'Mot de passe',
         signIn: 'Se connecter',
@@ -169,7 +169,7 @@ export const translations = {
         category: 'Catégorie',
         stock: 'Stock',
         image: 'Image du produit',
-        changeImage: "Changer l'image",
+        changeImage: "Changer l’image",
         visible: 'Visible sur le site',
         hidden: 'Masqué',
         save: 'Enregistrer',
@@ -203,7 +203,7 @@ export const translations = {
         type: { image: 'Image', video: 'Vidéo' },
         title_fr: 'Titre (Français)',
         category: 'Catégorie',
-        sortOrder: "Ordre d'affichage",
+        sortOrder: 'Ordre d’affichage',
       },
 
       requests: {
@@ -236,8 +236,8 @@ export const translations = {
           delivery_note: 'Bon de livraison',
         },
         docNumber: 'N° Document',
-        issuedDate: "Date d'émission",
-        dueDate: "Date d'échéance",
+        issuedDate: "Date d’émission",
+        dueDate: 'Date d’échéance',
         client: 'Informations client',
         clientName: 'Nom / Raison sociale',
         clientAddress: 'Adresse',
@@ -253,7 +253,7 @@ export const translations = {
         subtotal: 'Sous-total HT',
         tax: 'TVA ({{rate}}%)',
         grandTotal: 'Total TTC',
-        currency: "Devise d'affichage",
+        currency: 'Devise d’affichage',
         notes: 'Notes / Conditions',
         paymentTerms: 'Conditions de paiement',
         preview: 'Aperçu',
@@ -265,8 +265,8 @@ export const translations = {
       },
 
       settings: {
-        title: "Paramètres de l'entreprise",
-        companyName: "Nom de l'entreprise",
+        title: 'Paramètres de l’entreprise',
+        companyName: 'Nom de l’entreprise',
         address: 'Adresse complète',
         phone: 'Téléphone',
         whatsapp: 'Numéro WhatsApp',
@@ -418,7 +418,7 @@ export const translations = {
     },
 
     footer: {
-      tagline: 'شريكك الرقمي في جربة منذ 2021.',
+      tagline: 'شريكك الرقمي في جربة.',
       services: 'خدماتنا',
       legal: 'المعلومات القانونية',
       rc: 'السجل التجاري',
@@ -651,12 +651,12 @@ export const translations = {
       messagePlaceholder: 'Describe your need...',
       send: 'Send',
       sending: 'Sending...',
-      sent: "Message sent! We'll reply soon.",
+      sent: 'Message sent! We’ll reply soon.',
       error: 'Send error. Try again or contact us directly.',
     },
 
     footer: {
-      tagline: 'Your IT & Media partner in Djerba since 2021.',
+      tagline: 'Your IT & Media partner in Djerba.',
       services: 'Our services',
       legal: 'Legal information',
       rc: 'Trade register',
@@ -786,4 +786,19 @@ export const translations = {
       deactivate: 'Deactivate',
     },
   },
+}
+
+/* ── Compléments (audit final) ───────────────────────────────────────────
+   • admin.nav : libellés du menu admin (admin.products etc. sont des groupes)
+   • products.categories.general : catégorie par défaut de la base           */
+const NAV = {
+  fr: { dashboard: 'Tableau de bord', products: 'Produits', services: 'Services', media: 'Galerie', documents: 'Documents', requests: 'Demandes', settings: 'Paramètres' },
+  ar: { dashboard: 'لوحة التحكم', products: 'المنتجات', services: 'الخدمات', media: 'المعرض', documents: 'الوثائق', requests: 'الطلبات', settings: 'الإعدادات' },
+  en: { dashboard: 'Dashboard', products: 'Products', services: 'Services', media: 'Gallery', documents: 'Documents', requests: 'Requests', settings: 'Settings' },
+}
+const GENERAL = { fr: 'Divers', ar: 'متفرقات', en: 'Other' }
+for (const l of ['fr', 'ar', 'en']) {
+  translations[l].admin = { ...(translations[l].admin || {}), nav: NAV[l] }
+  translations[l].products = { ...(translations[l].products || {}) }
+  translations[l].products.categories = { ...(translations[l].products.categories || {}), general: GENERAL[l] }
 }

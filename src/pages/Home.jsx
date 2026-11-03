@@ -11,7 +11,10 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <div className="lg:ml-64 transition-all duration-300">
+
+      {/* ms-64 = marge côté début : gauche en FR/EN, droite en arabe (RTL),
+          pour suivre la position de la sidebar. */}
+      <div className="lg:ms-64 transition-all duration-300">
         <div className="h-14 lg:h-0" />
         <main>
           <HeroSection />
@@ -21,7 +24,7 @@ export default function Home() {
         </main>
         <Footer />
       </div>
-      {/* Boutons flottants */}
+
       <WhatsAppFloat />
       <QuoteCart />
     </>

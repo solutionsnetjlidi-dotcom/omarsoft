@@ -1,74 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml"
-  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-
-  <!-- Page principale -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.omarsoft.tn/</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-    <!-- Hreflang multilingue -->
-    <xhtml:link rel="alternate" hreflang="fr"      href="https://www.omarsoft.tn/" />
-    <xhtml:link rel="alternate" hreflang="ar"      href="https://www.omarsoft.tn/" />
-    <xhtml:link rel="alternate" hreflang="en"      href="https://www.omarsoft.tn/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.omarsoft.tn/" />
-    <!-- Images principales -->
-    <image:image>
-      <image:loc>https://www.omarsoft.tn/logo.png</image:loc>
-      <image:title>OmarSoft – Jlidi Network Solutions Logo</image:title>
-      <image:caption>Logo OmarSoft, partenaire IT &amp; Multimédia à Djerba, Tunisie</image:caption>
-    </image:image>
+    <lastmod>2026-11-02</lastmod>
   </url>
-
-  <!-- Section Catalogue produits -->
-  <url>
-    <loc>https://www.omarsoft.tn/#products</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- Section Services -->
-  <url>
-    <loc>https://www.omarsoft.tn/#services</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- Section Formations -->
-  <url>
-    <loc>https://www.omarsoft.tn/#training</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Section Agence Média -->
-  <url>
-    <loc>https://www.omarsoft.tn/#media</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Section Contact -->
-  <url>
-    <loc>https://www.omarsoft.tn/#contact</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Assistance AnyDesk -->
-  <url>
-    <loc>https://www.omarsoft.tn/#assistance</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
 </urlset>

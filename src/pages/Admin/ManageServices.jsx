@@ -280,14 +280,16 @@ export default function ManageServices() {
   }
 
   async function toggleVisibility(svc) {
-    await supabase.from('services').update({ is_visible: !svc.is_visible }).eq('id', svc.id)
+    const { error } = await supabase.from('services').update({ is_visible: !svc.is_visible }).eq('id', svc.id)
+    if (error) return showToast(error.message, false)
     setServices((prev) => prev.map((s) => s.id === svc.id ? { ...s, is_visible: !s.is_visible } : s))
     showToast(t('common.success'))
   }
 
   async function deleteSvc(svc) {
     if (!window.confirm('Confirmer la suppression ?')) return
-    await supabase.from('services').delete().eq('id', svc.id)
+    const { error } = await supabase.from('services').delete().eq('id', svc.id)
+    if (error) return showToast(error.message, false)
     setServices((prev) => prev.filter((s) => s.id !== svc.id))
     showToast(t('common.success'))
   }
